@@ -1,0 +1,106 @@
+<html>
+	<head>
+	  	<meta charset="UTF-8">
+
+		<title>Process Street Angular JS test</title>
+		<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.js"></script>
+		<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.6.1/angular.js"></script>
+
+		<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/blueimp-file-upload/9.14.2/js/jquery.iframe-transport.js"></script>
+		<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/blueimp-file-upload/9.14.2/js/vendor/jquery.ui.widget.js"></script>
+		<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/blueimp-file-upload/9.14.2/js/jquery.fileupload.js"></script>
+
+		<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js"></script>
+		<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.js"></script>
+
+
+		<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/blueimp-file-upload/9.14.2/css/jquery.fileupload.min.css" />
+
+		<!--<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/css/tether.min.css">-->
+		<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.css">
+		
+		<style type="text/css">
+			.wistiaUploadWidget{
+				width: 400px;
+				margin: 100px auto 0px;
+				border: 1px solid black;
+				border-radius: 4px;
+				padding: 10px;
+			}
+		</style>
+
+		<script type="text/javascript">
+			(function(angular) {
+				angular.module('PSTestApp', [])
+				.controller('MainCtrl', function MainCtrl() {
+				  
+				})
+				.component('wistiaUpload', {
+				  templateUrl: 'wistiaUpload.html',
+				  controller: ['$timeout', '$element', '$sce', function($timeout, $element, $sce){
+				  	this.$onInit = function () {
+						this.progress = 0;
+						this.progress_style = {
+							width: "0%"
+						}
+						this.video_id = undefined;
+						this.video_src = undefined;
+
+						this.is_error = false;
+						this.error_msg = undefined;
+					};
+
+					this.trustSrc = function(src) {
+					    return $sce.trustAsResourceUrl(src);
+					}
+
+					var ctrl = this;
+
+					$element.first('.fileupload').fileupload({
+				        dataType: 'json',
+				        url: "https://upload.wistia.com",
+						formData: { 
+							api_password: "087d4d1b40e2c0542c1f7c732739e6695589e3c046f9068754ac411abb5bcf18" 
+						},
+
+				        done: function (e, data) {
+				        	console.log(data);
+				            $timeout(function(){
+						    	ctrl.video_id = data.result.hashed_id;
+						    	ctrl.video_src = "//fast.wistia.net/embed/iframe/"+data.result.hashed_id+"?videoFoam=true";
+						    });  
+				        },
+
+				        fail: function(e, data){
+				        	$timeout(function(){
+				        		ctrl.is_error = true;
+				        		ctrl.error_msg = data.jqXHR.responseJSON.error;
+				        	});
+				        },
+
+				        progressall: function (e, data) {
+				        	$timeout(function(){
+						    	ctrl.progress = parseInt(data.loaded / data.total * 100, 10);
+								ctrl.progress_style.width = parseInt(data.loaded / data.total * 100, 10)+"%"
+						    });    
+					    }
+				    });
+
+				  }],
+				  bindings: {
+				  	
+				  }
+				});
+			})(window.angular);
+		</script>
+	</head>
+	<body ng-app="PSTestApp">
+		<div ng-controller="MainCtrl">
+			<wistia-upload></wistia-upload>
+			<wistia-upload></wistia-upload>
+			<wistia-upload></wistia-upload>
+		</div>
+		
+		
+	</body>
+</html>
